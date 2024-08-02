@@ -97,7 +97,7 @@ Resources:
           Properties:
             RestApiId: !Ref TricycleApi
             Path: /delete-tricycle
-            Method: delete
+            Method: post
 
 Outputs:
   # Role for Lambda functions

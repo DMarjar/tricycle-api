@@ -37,7 +37,7 @@ def lambda_handler(event, __):
 
         # Return the tricycles with a 200 status code
         response = {
-            'statusCode': 200,
+            'statusCode': 201,
             'headers': response_headers,
             'body': json.dumps("Tricycle " + body['brand'] + " " + body['model'] + " saved successfully")
         }
