@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  tricycle-api
+
+  SAM Template for tricycle-api
+
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 256
+
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  TricycleApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+
+  GetTricyclesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get_tricycles/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        GetTricycles:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TricycleApi
+            Path: /get-tricycles
+            Method: get
+
+  SaveTricycleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: save_tricycle/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        SaveTricycles:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TricycleApi
+            Path: /save-tricycle
+            Method: post
+
+  UpdateTricycleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: update_tricycle/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 10
+      Events:
+        UpdateTricycles:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TricycleApi
+            Path: /update-tricycle
+            Method: put
+
+  DeleteTricycleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: delete_tricycle/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        DeleteTricycles:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TricycleApi
+            Path: /delete-tricycle
+            Method: delete
+
+Outputs:
+  # Role for Lambda functions
+  LambdaExecutionRoleArn:
+    Description: "Implicit IAM Role created for TricycleApi"
+    Value: !GetAtt LambdaExecutionRole.Arn
+
+  # API urls
+  GetTricyclesApi:
+    Description: "API Gateway endpoint URL for Prod stage for GetTricycles function"
+    Value: !Sub "https://${TricycleApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get-tricycles/"
+  SaveTricyclesApi:
+    Description: "API Gateway endpoint URL for Prod stage for SaveTricycles function"
+    Value: !Sub "https://${TricycleApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/save-tricycle/"
+  UpdateTricyclesApi:
+    Description: "API Gateway endpoint URL for Prod stage for UpdateTricycles function"
+    Value: !Sub "https://${TricycleApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update-tricycle/"
+  DeleteTricyclesApi:
+    Description: "API Gateway endpoint URL for Prod stage for DeleteTricycles function"
+    Value: !Sub "https://${TricycleApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete-tricycle/"
+
+    # Function ARNs
+  GetTricyclesFunctionArn:
+    Description: "GetTricycles function ARN"
+    Value: !GetAtt GetTricyclesFunction.Arn
+  SaveTricyclesFunctionArn:
+    Description: "SaveTricycles function ARN"
+    Value: !GetAtt SaveTricycleFunction.Arn
+  UpdateTricyclesFunctionArn:
+    Description: "UpdateTricycles function ARN"
+    Value: !GetAtt UpdateTricycleFunction.Arn
+  DeleteTricyclesFunctionArn:
+    Description: "DeleteTricycles function ARN"
+    Value: !GetAtt DeleteTricycleFunction.Arn
